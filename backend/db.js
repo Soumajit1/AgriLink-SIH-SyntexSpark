@@ -2,7 +2,7 @@ const mysql = require('mysql2');
 
 // Read configuration from environment variables (for Render / Cloud)
 // or fall back to local development database
-const dbConfig = {
+let dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : '@Soumajit2006',
@@ -11,15 +11,33 @@ const dbConfig = {
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    ssl: process.env.DB_SSL === 'true' || (process.env.DB_HOST && process.env.DB_HOST !== 'localhost')
+    ssl: (process.env.DB_SSL === 'true' || (process.env.DB_HOST && process.env.DB_HOST !== 'localhost'))
         ? { rejectUnauthorized: false }
         : undefined
 };
 
-// If DATABASE_URL or DB_URL is provided, use it directly
-const pool = (process.env.DATABASE_URL || process.env.DB_URL)
-    ? mysql.createPool(process.env.DATABASE_URL || process.env.DB_URL)
-    : mysql.createPool(dbConfig);
+// If DATABASE_URL or DB_URL is provided, parse it robustly
+const rawUrl = process.env.DATABASE_URL || process.env.DB_URL;
+if (rawUrl) {
+    try {
+        const parsed = new URL(rawUrl);
+        dbConfig = {
+            host: parsed.hostname,
+            port: Number(parsed.port) || 3306,
+            user: decodeURIComponent(parsed.username || 'root'),
+            password: decodeURIComponent(parsed.password || ''),
+            database: parsed.pathname ? parsed.pathname.replace(/^\//, '') : 'test',
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0,
+            ssl: { rejectUnauthorized: false }
+        };
+    } catch (e) {
+        console.warn('Could not parse DATABASE_URL with URL parser, falling back to direct string:', e.message);
+    }
+}
+
+const pool = mysql.createPool(dbConfig);
 
 pool.getConnection((err, connection) => {
     if (err) {
