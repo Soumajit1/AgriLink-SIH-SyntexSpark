@@ -248,5 +248,20 @@ app.listen(
             `AgriLink AI Backend running on http://localhost:${PORT}`
         );
 
+        // Keep-alive pinger to prevent Render free instance from sleeping
+        const renderUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL;
+        if (renderUrl) {
+            const https = renderUrl.startsWith('https') ? require('https') : require('http');
+            const intervalMs = 12 * 60 * 1000; // 12 minutes (Render sleeps at 15 min)
+            console.log(`[Keep-Alive] Active for ${renderUrl} every 12 minutes`);
+            setInterval(() => {
+                https.get(`${renderUrl}/api/health`, (res) => {
+                    console.log(`[Keep-Alive] Self-ping status: ${res.statusCode}`);
+                }).on('error', (err) => {
+                    console.warn(`[Keep-Alive] Self-ping notice:`, err.message);
+                });
+            }, intervalMs);
+        }
+
     }
 );
