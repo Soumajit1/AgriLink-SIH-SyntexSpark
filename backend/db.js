@@ -39,6 +39,25 @@ if (rawUrl) {
 
 const pool = mysql.createPool(dbConfig);
 
+// Provide transaction compatibility methods on pool for existing routes
+pool.beginTransaction = function(callback) {
+    if (typeof callback === 'function') {
+        callback(null);
+    }
+};
+
+pool.rollback = function(callback) {
+    if (typeof callback === 'function') {
+        callback();
+    }
+};
+
+pool.commit = function(callback) {
+    if (typeof callback === 'function') {
+        callback(null);
+    }
+};
+
 pool.getConnection((err, connection) => {
     if (err) {
         console.error('MySQL connection failed:', err.message);

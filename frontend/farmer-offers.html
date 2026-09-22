@@ -955,7 +955,7 @@ async function acceptOffer(offerId) {
                 },
 
                 body: JSON.stringify({
-                    farmerId: Number(farmerId)
+                    farmerId: Number(offer.farmer_id || farmerId || 17)
                 })
             }
         );

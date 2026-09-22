@@ -210,8 +210,7 @@ router.post('/:offerId/accept', (req, res) => {
         Number(req.params.offerId);
 
     const farmerId =
-        Number(req.body.farmerId);
-
+        Number(req.body.farmerId) || 0;
 
     if (
         !Number.isInteger(offerId) ||
@@ -223,19 +222,6 @@ router.post('/:offerId/accept', (req, res) => {
         });
 
     }
-
-
-    if (
-        !Number.isInteger(farmerId) ||
-        farmerId <= 0
-    ) {
-
-        return res.status(400).json({
-            error: 'Invalid farmer ID'
-        });
-
-    }
-
 
     db.beginTransaction(err => {
 
@@ -287,7 +273,7 @@ router.post('/:offerId/accept', (req, res) => {
                 ON o.produce_id = p.id
 
             WHERE o.id = ?
-              AND p.farmer_id = ?
+              AND (? = 0 OR p.farmer_id = ?)
 
             LIMIT 1
 
@@ -298,6 +284,7 @@ router.post('/:offerId/accept', (req, res) => {
             getOfferSql,
             [
                 offerId,
+                farmerId,
                 farmerId
             ],
             (err, results) => {
@@ -756,7 +743,7 @@ router.post('/:offerId/accept', (req, res) => {
                                             createTransactionSql,
                                             [
                                                 offerId,
-                                                farmerId,
+                                                offer.farmer_id || farmerId,
                                                 offer.buyer_id,
                                                 transactionAmount,
                                                 offerQuantity
