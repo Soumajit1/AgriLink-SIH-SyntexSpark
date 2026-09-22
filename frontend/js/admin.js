@@ -165,7 +165,7 @@ async function loadAdminUsers() {
         const role = roleFilter ? roleFilter.value : 'all';
         const status = statusFilter ? statusFilter.value : 'all';
 
-        const url = new URL(`${API_BASE}/api/admin/users`);
+        const url = new URL(`${API_BASE}/api/admin/users`, window.location.origin);
         if (search) url.searchParams.set('search', search);
         if (role && role !== 'All Roles') url.searchParams.set('role', role);
         if (status && status !== 'All Status') url.searchParams.set('status', status);
@@ -339,7 +339,7 @@ async function loadAdminTransactions() {
         const startDate = document.getElementById('txnStartDate');
         const endDate = document.getElementById('txnEndDate');
 
-        const url = new URL(`${API_BASE}/api/admin/transactions`);
+        const url = new URL(`${API_BASE}/api/admin/transactions`, window.location.origin);
         if (statusFilter && statusFilter.value !== 'All Status') url.searchParams.set('status', statusFilter.value);
         if (startDate && startDate.value) url.searchParams.set('startDate', startDate.value);
         if (endDate && endDate.value) url.searchParams.set('endDate', endDate.value);
