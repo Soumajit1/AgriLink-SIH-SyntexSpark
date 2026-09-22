@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reports — Admin — AgriLink AI</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboards.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i data-lucide="tractor"></i> AgriLink AI</div>
+    </div>
+    <nav class="nav-menu">
+      <a href="dashboard-admin.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i> Overview
+      </a>
+      <a href="admin-users.html" class="nav-item">
+        <i data-lucide="users"></i> User Management
+      </a>
+      <a href="admin-transactions.html" class="nav-item">
+        <i data-lucide="receipt"></i> Transactions
+      </a>
+      <a href="admin-disputes.html" class="nav-item">
+        <i data-lucide="alert-triangle"></i> Disputes
+      </a>
+      <a href="admin-reports.html" class="nav-item active">
+        <i data-lucide="file-text"></i> Reports
+      </a>
+      <a href="admin-analytics.html" class="nav-item">
+        <i data-lucide="trending-up"></i> System Analytics
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn" class="nav-item" style="color:#e74c3c;padding:0;">
+        <i data-lucide="log-out"></i> Log Out
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar glass-panel">
+      <h2 class="page-title">Platform Reports & Exports</h2>
+      <div class="topbar-actions">
+        <button id="notifBtn" class="btn-secondary" style="padding:8px 12px;display:flex;align-items:center;gap:8px;">
+          <i data-lucide="bell" style="width:16px;height:16px;"></i> Notifications
+        </button>
+        <div class="user-profile">
+          <div class="avatar" id="userAvatar">A</div>
+          <span id="userName" style="font-weight:500;">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-container fade-in">
+      <div class="grid-cards">
+        <div class="card-3d" style="padding:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <i data-lucide="indian-rupee" style="color:var(--color-primary);width:24px;height:24px;"></i>
+            <h3 style="margin:0;">Monthly Revenue Report</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Platform fee collection and taxation summary by month.</p>
+          <div style="display:flex;gap:8px;">
+            <button data-export-type="revenue" data-export-format="pdf" class="btn-primary" style="flex:1;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:none;border-radius:6px;cursor:pointer;">
+              <i data-lucide="printer" style="width:14px;height:14px;"></i> Print / PDF
+            </button>
+            <button data-export-type="revenue" data-export-format="csv" class="btn-secondary" style="flex:1;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid #ddd;border-radius:6px;cursor:pointer;">
+              <i data-lucide="file-spreadsheet" style="width:14px;height:14px;"></i> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="card-3d" style="padding:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <i data-lucide="users" style="color:#1565c0;width:24px;height:24px;"></i>
+            <h3 style="margin:0;">User Directory Report</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Active farmers, buyers, FPOs, and registration logs.</p>
+          <div style="display:flex;gap:8px;">
+            <button data-export-type="users" data-export-format="pdf" class="btn-primary" style="flex:1;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:none;border-radius:6px;cursor:pointer;">
+              <i data-lucide="printer" style="width:14px;height:14px;"></i> Print / PDF
+            </button>
+            <button data-export-type="users" data-export-format="csv" class="btn-secondary" style="flex:1;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid #ddd;border-radius:6px;cursor:pointer;">
+              <i data-lucide="file-spreadsheet" style="width:14px;height:14px;"></i> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="card-3d" style="padding:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <i data-lucide="bar-chart-2" style="color:#ef6c00;width:24px;height:24px;"></i>
+            <h3 style="margin:0;">Transaction Volume Report</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">All transactions, amounts, and platform 1% fee breakdown.</p>
+          <div style="display:flex;gap:8px;">
+            <button data-export-type="transactions" data-export-format="pdf" class="btn-primary" style="flex:1;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:none;border-radius:6px;cursor:pointer;">
+              <i data-lucide="printer" style="width:14px;height:14px;"></i> Print / PDF
+            </button>
+            <button data-export-type="transactions" data-export-format="csv" class="btn-secondary" style="flex:1;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid #ddd;border-radius:6px;cursor:pointer;">
+              <i data-lucide="file-spreadsheet" style="width:14px;height:14px;"></i> Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div class="card-3d" style="padding:24px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+            <i data-lucide="alert-triangle" style="color:#e74c3c;width:24px;height:24px;"></i>
+            <h3 style="margin:0;">Dispute Summary Report</h3>
+          </div>
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">All dispute cases, resolutions, and outcomes.</p>
+          <div style="display:flex;gap:8px;">
+            <button data-export-type="disputes" data-export-format="pdf" class="btn-primary" style="flex:1;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:none;border-radius:6px;cursor:pointer;">
+              <i data-lucide="printer" style="width:14px;height:14px;"></i> Print / PDF
+            </button>
+            <button data-export-type="disputes" data-export-format="csv" class="btn-secondary" style="flex:1;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border:1px solid #ddd;border-radius:6px;cursor:pointer;">
+              <i data-lucide="file-spreadsheet" style="width:14px;height:14px;"></i> Export CSV
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

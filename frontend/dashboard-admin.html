@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard — AgriLink AI</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboards.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="dashboard-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i data-lucide="tractor"></i> AgriLink AI</div>
+    </div>
+    <nav class="nav-menu">
+      <a href="dashboard-admin.html" class="nav-item active">
+        <i data-lucide="layout-dashboard"></i> Overview
+      </a>
+      <a href="admin-users.html" class="nav-item">
+        <i data-lucide="users"></i> User Management
+      </a>
+      <a href="admin-transactions.html" class="nav-item">
+        <i data-lucide="receipt"></i> Transactions
+      </a>
+      <a href="admin-disputes.html" class="nav-item">
+        <i data-lucide="alert-triangle"></i> Disputes
+      </a>
+      <a href="admin-reports.html" class="nav-item">
+        <i data-lucide="file-text"></i> Reports
+      </a>
+      <a href="admin-analytics.html" class="nav-item">
+        <i data-lucide="trending-up"></i> System Analytics
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn" class="nav-item" style="color:#e74c3c;padding:0;">
+        <i data-lucide="log-out"></i> Log Out
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <header class="topbar glass-panel">
+      <h2 class="page-title">Platform Overview</h2>
+      <div class="topbar-actions">
+        <span style="background:rgba(0,191,165,0.1);color:var(--color-accent);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;">
+          <i data-lucide="activity" style="width:14px;height:14px;"></i> System: Operational
+        </span>
+        <div class="user-profile">
+          <div class="avatar" id="userAvatar" style="background:#e74c3c;">A</div>
+          <span id="userName" style="font-weight:500;">System Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-container fade-in">
+
+      <!-- Stat Cards -->
+      <div class="grid-cards">
+        <div class="card-3d stat-card" style="background:linear-gradient(135deg,#1b5e20,#004d40);color:white;">
+          <div class="stat-header" style="color:rgba(255,255,255,0.8);">
+            <span>Total GMV (Platform Volume)</span>
+            <span style="font-size:12px;background:rgba(255,255,255,0.2);padding:2px 8px;border-radius:10px;">Live</span>
+          </div>
+          <div class="stat-value" id="statTotalGmv" style="color:white;">₹0</div>
+        </div>
+
+        <div class="card-3d stat-card">
+          <div class="stat-header">
+            <span>Total Registered Users</span>
+            <span class="trend-up">Active Community</span>
+          </div>
+          <div class="stat-value" id="statActiveUsers">0</div>
+        </div>
+
+        <div class="card-3d stat-card">
+          <div class="stat-header">
+            <span>Pending Disputes</span>
+            <span style="color:#e74c3c;font-weight:600;">Action Required</span>
+          </div>
+          <div class="stat-value" id="statOpenDisputes" style="color:#e74c3c;">0</div>
+        </div>
+
+        <div class="card-3d stat-card">
+          <div class="stat-header">
+            <span>Platform Revenue (1% Fee)</span>
+            <span class="trend-up">Earned</span>
+          </div>
+          <div class="stat-value" id="statPlatformRevenue" style="color:var(--color-primary);">₹0</div>
+        </div>
+      </div>
+
+      <!-- Trust Score Banner -->
+      <div class="dashboard-section glass-panel" style="margin-top:20px;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,191,165,0.05);border:1px solid rgba(0,191,165,0.2);">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#00bfa5;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;">
+            ★
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:15px;">Platform Overall Trust Score</div>
+            <div style="font-size:13px;color:var(--text-muted);">Calculated dynamically from verified transaction reviews.</div>
+          </div>
+        </div>
+        <div style="font-size:24px;font-weight:700;color:#f39c12;" id="statAvgTrust">
+          ★ 5.0 (0 reviews)
+        </div>
+      </div>
+
+      <!-- Charts & Activity Row -->
+      <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:24px;">
+        <div class="dashboard-section card-3d" style="flex:2;min-width:320px;">
+          <div class="section-title">Platform User Growth</div>
+          <canvas id="userChart" height="220"></canvas>
+        </div>
+
+        <div class="dashboard-section card-3d" style="flex:1;min-width:280px;">
+          <div class="section-title">Recent Platform Activity</div>
+          <div id="recentActivityContainer" style="display:flex;flex-direction:column;gap:12px;">
+            <div style="color:var(--text-muted);padding:15px;">Loading recent platform activity...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Cards -->
+      <div style="margin-top:24px;">
+        <h3 style="font-family:'Outfit',sans-serif;margin-bottom:16px;font-size:18px;">Management Quick Actions</h3>
+        <div class="grid-cards">
+          <a href="admin-users.html" class="card-3d" style="padding:20px;text-decoration:none;display:block;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#1b5e20,var(--color-accent));display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="users" style="color:white;width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-weight:600;color:var(--text-main);">User Management</div>
+                <div style="font-size:13px;color:var(--text-muted);">Approve, suspend, add, or delete users</div>
+              </div>
+              <i data-lucide="chevron-right" style="margin-left:auto;color:var(--text-muted);width:16px;height:16px;"></i>
+            </div>
+          </a>
+
+          <a href="admin-disputes.html" class="card-3d" style="padding:20px;text-decoration:none;display:block;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#c62828,#e74c3c);display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="scale" style="color:white;width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-weight:600;color:var(--text-main);">Dispute Control Room</div>
+                <div style="font-size:13px;color:var(--text-muted);">Investigate and resolve tickets</div>
+              </div>
+              <i data-lucide="chevron-right" style="margin-left:auto;color:var(--text-muted);width:16px;height:16px;"></i>
+            </div>
+          </a>
+
+          <a href="admin-transactions.html" class="card-3d" style="padding:20px;text-decoration:none;display:block;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#1565c0,#0d47a1);display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="receipt" style="color:white;width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-weight:600;color:var(--text-main);">Transactions Monitor</div>
+                <div style="font-size:13px;color:var(--text-muted);">Monitor 1% fee & export CSV</div>
+              </div>
+              <i data-lucide="chevron-right" style="margin-left:auto;color:var(--text-muted);width:16px;height:16px;"></i>
+            </div>
+          </a>
+
+          <a href="admin-reports.html" class="card-3d" style="padding:20px;text-decoration:none;display:block;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,#6a1b9a,#4a148c);display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="file-bar-chart" style="color:white;width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-weight:600;color:var(--text-main);">Platform Reports</div>
+                <div style="font-size:13px;color:var(--text-muted);">Download revenue & user reports</div>
+              </div>
+              <i data-lucide="chevron-right" style="margin-left:auto;color:var(--text-muted);width:16px;height:16px;"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="js/admin.js"></script>
+<script>
+  // Static Chart rendering fallback
+  try {
+    new Chart(document.getElementById('userChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'],
+        datasets: [
+          { label: 'Farmers', data: [1200,1400,1700,2100,2600,3100,3800,4500,5200], borderColor: '#1b5e20', backgroundColor: 'rgba(27,94,32,0.05)', fill: true, tension: 0.4 },
+          { label: 'Buyers', data: [200,320,450,600,750,900,1100,1300,1550], borderColor: '#00bfa5', backgroundColor: 'rgba(0,191,165,0.05)', fill: true, tension: 0.4 },
+          { label: 'FPOs', data: [40,65,90,120,150,180,210,240,280], borderColor: '#f39c12', fill: false, tension: 0.4 }
+        ]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: false } } }
+    });
+  } catch(e) {}
+</script>
+</body>
+</html>

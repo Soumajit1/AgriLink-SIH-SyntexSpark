@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Logistics — AgriLink AI</title>
+
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboards.css">
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+.shipment-card {
+    background: var(--bg-surface, #ffffff);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.05));
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shipment-card:hover {
+    box-shadow: var(--shadow-md, 0 4px 14px rgba(0,0,0,0.08));
+}
+
+.progress-track {
+    height: 6px;
+    background: #e8f5e9;
+    border-radius: 3px;
+    position: relative;
+    margin: 28px 0 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--color-primary, #1b5e20), var(--color-accent, #00bfa5));
+    transition: width 0.4s ease;
+}
+
+.progress-dots {
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    top: -8px;
+    width: 100%;
+}
+
+.progress-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 2px var(--color-primary, #1b5e20);
+    background: var(--color-primary, #1b5e20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-dot.inactive {
+    background: white;
+    box-shadow: 0 0 0 2px #ccc;
+}
+
+.progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted, #666);
+}
+
+.logistics-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.logistics-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.logistics-search,
+.logistics-filter {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.12);
+    background: var(--bg-surface, #ffffff);
+    color: inherit;
+    outline: none;
+    font-size: 14px;
+}
+
+.logistics-search {
+    min-width: 240px;
+}
+
+.logistics-filter {
+    min-width: 150px;
+}
+
+.action-btn {
+    border: none;
+    cursor: pointer;
+    padding: 7px 12px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s;
+}
+
+.action-btn:hover {
+    opacity: 0.88;
+}
+
+.btn-primary-action {
+    background: var(--color-primary, #1b5e20);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary-action:hover {
+    opacity: 0.92;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 14px;
+    max-width: 520px;
+    width: 100%;
+    padding: 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-main, #222);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--color-primary, #1b5e20);
+}
+
+.toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 9999;
+    padding: 13px 18px;
+    border-radius: 10px;
+    background: #222;
+    color: white;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.toast.success {
+    background: #16834b;
+}
+
+.toast.error {
+    background: #c0392b;
+}
+</style>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i data-lucide="tractor"></i>
+                AgriLink AI
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+          <a href="dashboard-farmer.html" class="nav-item">
+            <i data-lucide="layout-dashboard"></i> Overview
+          </a>
+          <a href="farmer-market-prices.html" class="nav-item">
+            <i data-lucide="trending-up"></i> Market Prices
+          </a>
+          <a href="farmer-produce.html" class="nav-item">
+            <i data-lucide="sprout"></i> My Produce
+          </a>
+          <a href="farmer-offers.html" class="nav-item">
+            <i data-lucide="handshake"></i> Buyer Offers
+          </a>
+          <a href="farmer-transactions.html" class="nav-item">
+            <i data-lucide="receipt"></i> Transactions
+          </a>
+          <a href="farmer-disputes.html" class="nav-item">
+            <i data-lucide="alert-triangle"></i> Disputes
+          </a>
+          <a href="farmer-logistics.html" class="nav-item active">
+            <i data-lucide="truck"></i> Logistics
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#"
+               id="logoutBtn"
+               class="nav-item"
+               style="color:#e74c3c;padding:0;">
+                <i data-lucide="log-out"></i>
+                Log Out
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <header class="topbar glass-panel">
+
+            <h2 class="page-title">
+                Logistics & Shipments
+            </h2>
+
+            <div class="topbar-actions">
+
+                <button
+                    id="newShipmentBtn"
+                    class="btn-primary-action"
+                >
+                    <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
+                    New Shipment
+                </button>
+
+                <button
+                    id="refreshBtn"
+                    class="btn-secondary"
+                    style="
+                        padding:8px 12px;
+                        display:flex;
+                        align-items:center;
+                        gap:8px;
+                    "
+                >
+                    <i data-lucide="refresh-cw" style="width:16px;height:16px;"></i>
+                    Refresh
+                </button>
+
+                <div class="user-profile">
+                    <div class="avatar" id="userAvatar">F</div>
+                    <span id="userName" style="font-weight:500;">Farmer</span>
+                </div>
+
+            </div>
+
+        </header>
+
+        <div class="dashboard-container fade-in">
+
+            <!-- STATISTICS CARDS -->
+            <div class="grid-cards" style="margin-bottom:28px;">
+
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Total Shipments</span>
+                        <i data-lucide="truck" style="width:18px;height:18px;color:var(--color-primary);"></i>
+                    </div>
+                    <div class="stat-value" id="totalShipments">0</div>
+                </div>
+
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>In Transit</span>
+                        <i data-lucide="navigation" style="width:18px;height:18px;color:#f39c12;"></i>
+                    </div>
+                    <div class="stat-value" id="inTransitShipments" style="color:#f39c12;">0</div>
+                </div>
+
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Delivered</span>
+                        <i data-lucide="check-circle-2" style="width:18px;height:18px;color:var(--color-accent);"></i>
+                    </div>
+                    <div class="stat-value" id="deliveredShipments" style="color:var(--color-accent);">0</div>
+                </div>
+
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Pending Dispatch</span>
+                        <i data-lucide="clock" style="width:18px;height:18px;color:#1565c0;"></i>
+                    </div>
+                    <div class="stat-value" id="pendingShipments" style="color:#1565c0;">0</div>
+                </div>
+
+            </div>
+
+            <!-- ACTIVE SHIPMENTS -->
+            <div style="margin-bottom:32px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <h3 style="font-family:'Outfit',sans-serif;margin:0;font-size:20px;">
+                        Active Shipments
+                    </h3>
+                </div>
+
+                <div id="activeShipmentsContainer">
+                    <div class="loading-state" style="text-align:center;padding:30px;color:var(--text-muted);">
+                        Loading active shipments...
+                    </div>
+                </div>
+            </div>
+
+            <!-- SHIPMENT HISTORY TABLE -->
+            <div class="dashboard-section glass-panel">
+
+                <div class="section-title">
+                    <span>All Shipments History</span>
+                </div>
+
+                <div class="logistics-toolbar">
+                    <div class="logistics-controls">
+                        <input
+                            type="text"
+                            id="searchInput"
+                            class="logistics-search"
+                            placeholder="Search tracking, buyer or crop..."
+                        >
+
+                        <select id="statusFilter" class="logistics-filter">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="in_transit">In Transit</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-container" style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Tracking / Shipment</th>
+                                <th>Buyer</th>
+                                <th>Produce</th>
+                                <th>Route</th>
+                                <th>Created</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shipmentsTableBody">
+                            <tr>
+                                <td colspan="7" class="loading-state" style="text-align:center;padding:30px;color:var(--text-muted);">
+                                    Loading shipments...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- CREATE SHIPMENT MODAL -->
+<div id="createShipmentModal" class="modal-backdrop">
+    <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #eee;">
+            <h3 style="margin:0;font-family:'Outfit',sans-serif;font-size:18px;">Create New Shipment</h3>
+            <button onclick="closeCreateShipmentModal()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#888;">&times;</button>
+        </div>
+
+        <form id="createShipmentForm">
+            <div class="form-group">
+                <label for="transactionSelect">Select Transaction to Dispatch *</label>
+                <select id="transactionSelect" required>
+                    <option value="">Loading transactions...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="pickupInput">Pickup Location (Farm / Warehouse) *</label>
+                <input type="text" id="pickupInput" placeholder="e.g. Village Farm, Burdwan, WB" required>
+            </div>
+
+            <div class="form-group">
+                <label for="deliveryInput">Delivery Location (Buyer Destination) *</label>
+                <input type="text" id="deliveryInput" placeholder="e.g. AgriCorp Depot, Kolkata" required>
+            </div>
+
+            <div class="form-group">
+                <label for="transporterInput">Transporter / Driver Name & Contact</label>
+                <input type="text" id="transporterInput" placeholder="e.g. Express Logistics / Suresh (+91 9876543210)">
+            </div>
+
+            <div class="form-group">
+                <label for="trackingInput">Tracking Number (Optional)</label>
+                <input type="text" id="trackingInput" placeholder="Leave blank to auto-generate">
+            </div>
+
+            <div class="form-group">
+                <label for="estimatedDateInput">Estimated Delivery Date</label>
+                <input type="date" id="estimatedDateInput">
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px;">
+                <button type="button" onclick="closeCreateShipmentModal()" class="action-btn" style="background:#eee;color:#333;padding:9px 16px;">Cancel</button>
+                <button type="submit" class="btn-primary-action" style="padding:9px 20px;">Dispatch Shipment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/farmer-logistics.js"></script>
+<script src="js/dashboard.js?v=3"></script>
+
+</body>
+</html>

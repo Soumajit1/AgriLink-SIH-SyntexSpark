@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disputes Control — Admin — AgriLink AI</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboards.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .action-btn {
+    border: none; border-radius: 6px; cursor: pointer; font-weight: 600; padding: 6px 12px;
+    font-size: 12px; transition: opacity 0.2s;
+  }
+  .action-btn:hover { opacity: 0.85; }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none;
+    justify-content: center; align-items: center; z-index: 10000; padding: 20px;
+  }
+  .modal-content {
+    background: white; border-radius: 12px; max-width: 520px; width: 100%;
+    padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  .case-field { margin-bottom: 12px; }
+  .case-field label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 3px; }
+  .case-field div { font-weight: 600; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i data-lucide="tractor"></i> AgriLink AI</div>
+    </div>
+    <nav class="nav-menu">
+      <a href="dashboard-admin.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i> Overview
+      </a>
+      <a href="admin-users.html" class="nav-item">
+        <i data-lucide="users"></i> User Management
+      </a>
+      <a href="admin-transactions.html" class="nav-item">
+        <i data-lucide="receipt"></i> Transactions
+      </a>
+      <a href="admin-disputes.html" class="nav-item active">
+        <i data-lucide="alert-triangle"></i> Disputes
+      </a>
+      <a href="admin-reports.html" class="nav-item">
+        <i data-lucide="file-text"></i> Reports
+      </a>
+      <a href="admin-analytics.html" class="nav-item">
+        <i data-lucide="trending-up"></i> System Analytics
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn" class="nav-item" style="color:#e74c3c;padding:0;">
+        <i data-lucide="log-out"></i> Log Out
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar glass-panel">
+      <h2 class="page-title">Dispute Resolution Control Room</h2>
+      <div class="topbar-actions">
+        <button id="notifBtn" class="btn-secondary" style="padding:8px 12px;display:flex;align-items:center;gap:8px;">
+          <i data-lucide="bell" style="width:16px;height:16px;"></i> Notifications
+        </button>
+        <div class="user-profile">
+          <div class="avatar" id="userAvatar">A</div>
+          <span id="userName" style="font-weight:500;">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-container fade-in">
+      <div class="grid-cards" style="margin-bottom:24px;">
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>Open Disputes</span><span style="color:#e74c3c;font-weight:600;">Action Required</span></div>
+          <div class="stat-value" id="statOpenDisputesCount" style="color:#e74c3c;">0</div>
+        </div>
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>Resolved Disputes</span></div>
+          <div class="stat-value" id="statResolvedDisputesCount" style="color:var(--color-accent);">0</div>
+        </div>
+      </div>
+
+      <div class="dashboard-section glass-panel">
+        <div class="section-title">Active Dispute Tickets</div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ticket Code</th>
+                <th>Date Raised</th>
+                <th>Raised By</th>
+                <th>Against</th>
+                <th>Related Txn</th>
+                <th>Issue Type</th>
+                <th>Priority</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminOpenDisputesBody">
+              <tr><td colspan="8" style="text-align:center;padding:24px;">Loading open disputes...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="dashboard-section glass-panel" style="margin-top:28px;">
+        <div class="section-title">Resolved Cases History</div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ticket Code</th>
+                <th>Parties Involved</th>
+                <th>Issue</th>
+                <th>Resolution Notes</th>
+                <th>Closed Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminResolvedDisputesBody">
+              <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-muted);">No resolved cases yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- REVIEW DISPUTE MODAL -->
+<div id="reviewDisputeModal" class="modal-backdrop">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:10px;">
+      <h3 style="margin:0;font-size:18px;">Case Review: <span id="modalTicketCode"></span></h3>
+      <button onclick="closeReviewCaseModal()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#888;">&times;</button>
+    </div>
+
+    <input type="hidden" id="modalDisputeId">
+
+    <div class="case-field">
+      <label>Parties Involved</label>
+      <div id="modalParties"></div>
+    </div>
+
+    <div class="case-field">
+      <label>Transaction Details</label>
+      <div id="modalTxnInfo"></div>
+    </div>
+
+    <div class="case-field">
+      <label>Issue Type</label>
+      <div id="modalIssue" style="color:#e74c3c;"></div>
+    </div>
+
+    <div class="case-field">
+      <label>Complaint Description</label>
+      <div id="modalDescription" style="font-weight:normal;background:#f9f9f9;padding:10px;border-radius:8px;font-size:13px;"></div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Official Admin Resolution *</label>
+      <textarea id="modalResolutionInput" rows="3" placeholder="Enter settlement terms, refund info, or dispute conclusion..." style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13px;box-sizing:border-box;outline:none;"></textarea>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+      <button type="button" onclick="closeReviewCaseModal()" class="action-btn" style="background:#eee;padding:8px 14px;">Cancel</button>
+      <button type="button" onclick="submitModalResolution('dismissed')" class="action-btn" style="background:#f39c12;color:white;padding:8px 14px;">Dismiss Ticket</button>
+      <button type="button" onclick="submitModalResolution('resolved')" class="action-btn" style="background:var(--color-primary);color:white;padding:8px 16px;">Confirm Resolution</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/admin.js"></script>
+<script>
+  function submitModalResolution(status) {
+    const id = document.getElementById('modalDisputeId').value;
+    const resNotes = document.getElementById('modalResolutionInput').value.trim();
+    if (status === 'resolved' && !resNotes) {
+      alert('Please provide resolution notes explaining the decision.');
+      return;
+    }
+    submitDisputeResolution(id, status, resNotes || 'Dismissed upon review.');
+  }
+</script>
+</body>
+</html>

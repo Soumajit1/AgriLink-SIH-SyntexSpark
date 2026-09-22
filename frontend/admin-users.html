@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management — Admin — AgriLink AI</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboards.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  .action-btn {
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: opacity 0.2s;
+  }
+  .action-btn:hover { opacity: 0.85; }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none;
+    justify-content: center; align-items: center; z-index: 10000; padding: 20px;
+  }
+  .modal-content {
+    background: white; border-radius: 12px; max-width: 480px; width: 100%;
+    padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 7px;
+    font-size: 14px; box-sizing: border-box; outline: none;
+  }
+</style>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i data-lucide="tractor"></i> AgriLink AI</div>
+    </div>
+    <nav class="nav-menu">
+      <a href="dashboard-admin.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i> Overview
+      </a>
+      <a href="admin-users.html" class="nav-item active">
+        <i data-lucide="users"></i> User Management
+      </a>
+      <a href="admin-transactions.html" class="nav-item">
+        <i data-lucide="receipt"></i> Transactions
+      </a>
+      <a href="admin-disputes.html" class="nav-item">
+        <i data-lucide="alert-triangle"></i> Disputes
+      </a>
+      <a href="admin-reports.html" class="nav-item">
+        <i data-lucide="file-text"></i> Reports
+      </a>
+      <a href="admin-analytics.html" class="nav-item">
+        <i data-lucide="trending-up"></i> System Analytics
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn" class="nav-item" style="color:#e74c3c;padding:0;">
+        <i data-lucide="log-out"></i> Log Out
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar glass-panel">
+      <h2 class="page-title">User Management</h2>
+      <div class="topbar-actions">
+        <button class="btn-primary" onclick="openAddUserModal()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:8px;background:var(--color-primary);color:white;cursor:pointer;font-weight:600;">
+          <i data-lucide="user-plus" style="width:16px;height:16px;"></i> Add New User
+        </button>
+        <div class="user-profile">
+          <div class="avatar" id="userAvatar">A</div>
+          <span id="userName" style="font-weight:500;">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-container fade-in">
+      <div class="grid-cards" style="margin-bottom:24px;">
+        <div class="card-3d stat-card" style="background:linear-gradient(135deg,#1b5e20,#004d40);color:white;">
+          <div class="stat-header" style="color:rgba(255,255,255,0.8);"><span>Total Users</span></div>
+          <div class="stat-value" id="statTotalUsers">0</div>
+        </div>
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>Farmers</span></div>
+          <div class="stat-value" id="statTotalFarmers" style="color:var(--color-primary);">0</div>
+        </div>
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>Buyers</span></div>
+          <div class="stat-value" id="statTotalBuyers" style="color:#1565c0;">0</div>
+        </div>
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>FPOs</span></div>
+          <div class="stat-value" id="statTotalFpos" style="color:#ef6c00;">0</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+        <input type="text" id="userSearchInput" placeholder="Search by name, email, or User ID..." style="padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;flex:1;min-width:200px;">
+        <select id="userRoleFilter" style="padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;">
+          <option value="all">All Roles</option>
+          <option value="farmer">Farmer</option>
+          <option value="buyer">Buyer</option>
+          <option value="fpo">FPO</option>
+        </select>
+        <select id="userStatusFilter" style="padding:10px 14px;border:1px solid #e0e0e0;border-radius:8px;">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="suspended">Suspended</option>
+          <option value="under_review">Under Review</option>
+        </select>
+      </div>
+
+      <div class="dashboard-section glass-panel">
+        <div class="section-title">All Platform Users</div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>User ID</th>
+                <th>Name & Email</th>
+                <th>Role</th>
+                <th>Trust Score</th>
+                <th>District</th>
+                <th>Registered</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminUsersTableBody">
+              <tr><td colspan="8" style="text-align:center;padding:24px;">Loading users...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ADD USER MODAL -->
+<div id="addUserModal" class="modal-backdrop">
+  <div class="modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:10px;">
+      <h3 style="margin:0;font-size:18px;">Create New User Account</h3>
+      <button onclick="closeAddUserModal()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#888;">&times;</button>
+    </div>
+    <form id="addUserForm">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="newUserName" required placeholder="e.g. Ramesh Ghosh">
+      </div>
+      <div class="form-group">
+        <label>Email Address *</label>
+        <input type="email" id="newUserEmail" required placeholder="e.g. ramesh@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password *</label>
+        <input type="password" id="newUserPassword" required placeholder="Temporary password">
+      </div>
+      <div class="form-group">
+        <label>Role *</label>
+        <select id="newUserRole" required>
+          <option value="farmer">Farmer</option>
+          <option value="buyer">Buyer</option>
+          <option value="fpo">FPO</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>District / Region</label>
+        <input type="text" id="newUserDistrict" placeholder="e.g. Bardhaman, West Bengal">
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="text" id="newUserPhone" placeholder="e.g. +91 9876543210">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+        <button type="button" onclick="closeAddUserModal()" class="action-btn" style="background:#eee;padding:8px 14px;">Cancel</button>
+        <button type="submit" class="action-btn" style="background:var(--color-primary);color:white;padding:8px 16px;">Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>

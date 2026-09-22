@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Analytics — Admin — AgriLink AI</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboards.css">
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="dashboard-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i data-lucide="tractor"></i> AgriLink AI</div>
+    </div>
+    <nav class="nav-menu">
+      <a href="dashboard-admin.html" class="nav-item">
+        <i data-lucide="layout-dashboard"></i> Overview
+      </a>
+      <a href="admin-users.html" class="nav-item">
+        <i data-lucide="users"></i> User Management
+      </a>
+      <a href="admin-transactions.html" class="nav-item">
+        <i data-lucide="receipt"></i> Transactions
+      </a>
+      <a href="admin-disputes.html" class="nav-item">
+        <i data-lucide="alert-triangle"></i> Disputes
+      </a>
+      <a href="admin-reports.html" class="nav-item">
+        <i data-lucide="file-text"></i> Reports
+      </a>
+      <a href="admin-analytics.html" class="nav-item active">
+        <i data-lucide="trending-up"></i> System Analytics
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#" id="logoutBtn" class="nav-item" style="color:#e74c3c;padding:0;">
+        <i data-lucide="log-out"></i> Log Out
+      </a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar glass-panel">
+      <h2 class="page-title">System Analytics & Infrastructure Telemetry</h2>
+      <div class="topbar-actions">
+        <button id="notifBtn" class="btn-secondary" style="padding:8px 12px;display:flex;align-items:center;gap:8px;">
+          <i data-lucide="bell" style="width:16px;height:16px;"></i> Notifications
+        </button>
+        <div class="user-profile">
+          <div class="avatar" id="userAvatar">A</div>
+          <span id="userName" style="font-weight:500;">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-container fade-in">
+      <div class="grid-cards" style="margin-bottom:24px;">
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>API Uptime</span><span class="trend-up">Stable</span></div>
+          <div class="stat-value" id="analyticsUptime" style="color:var(--color-accent);">99.9%</div>
+        </div>
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>Avg Database Latency</span></div>
+          <div class="stat-value" id="analyticsLatency">14ms</div>
+        </div>
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>Node Heap Memory</span></div>
+          <div class="stat-value" id="analyticsMemory">48 MB</div>
+        </div>
+        <div class="card-3d stat-card">
+          <div class="stat-header"><span>MySQL Server Status</span></div>
+          <div class="stat-value" style="color:var(--color-primary);font-size:22px;">Connected</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div class="dashboard-section card-3d" style="flex:2;min-width:300px;">
+          <div class="section-title">Daily Active Users (30-Day Trend)</div>
+          <canvas id="dauChart" height="200"></canvas>
+        </div>
+        <div class="dashboard-section card-3d" style="flex:1;min-width:250px;">
+          <div class="section-title">Transactions by Marketplace Channel</div>
+          <canvas id="roleChart" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="dashboard-section glass-panel" style="margin-top:24px;">
+        <div class="section-title">Infrastructure Components Health</div>
+        <table class="data-table">
+          <thead><tr><th>Component</th><th>Status</th><th>Protocol</th><th>Latency</th></tr></thead>
+          <tbody>
+            <tr><td>REST API Gateway</td><td><span class="badge badge-success">Operational</span></td><td>HTTP / Express</td><td>12ms</td></tr>
+            <tr><td>MySQL Database Engine</td><td><span class="badge badge-success">Operational</span></td><td>TCP / Port 3306</td><td>8ms</td></tr>
+            <tr><td>Authentication & JWT Service</td><td><span class="badge badge-success">Operational</span></td><td>Internal</td><td>2ms</td></tr>
+            <tr><td>Dispute & Trust Score Engine</td><td><span class="badge badge-success">Operational</span></td><td>Internal</td><td>4ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/admin.js"></script>
+<script>
+  try {
+    const daus = [120,145,132,160,178,155,190,210,225,198,240,255,260,245,270,280,265,290,310,295,320,285,300,315,305,320,330,310,284,295];
+    new Chart(document.getElementById('dauChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: daus.map((_,i) => `Day ${i+1}`),
+        datasets: [{ label: 'Active Users', data: daus, borderColor: '#1b5e20', backgroundColor: 'rgba(27,94,32,0.1)', fill: true, tension: 0.4, pointRadius: 2 }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: false } } }
+    });
+
+    new Chart(document.getElementById('roleChart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Produce Marketplace', 'Direct Contracts', 'FPO Bulk Order'],
+        datasets: [{ data: [65, 25, 10], backgroundColor: ['#1b5e20','#00bfa5','#f39c12'] }]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  } catch(e) {}
+</script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Transactions — AgriLink AI</title>
+
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dashboards.css">
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+.transaction-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.transaction-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.transaction-search,
+.transaction-filter {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: var(--bg-surface, #ffffff);
+    color: inherit;
+    outline: none;
+    font-size: 14px;
+}
+
+.transaction-search {
+    min-width: 240px;
+}
+
+.transaction-filter {
+    min-width: 150px;
+}
+
+.transaction-table-wrapper {
+    overflow-x: auto;
+}
+
+.transaction-id {
+    font-weight: 600;
+}
+
+.amount {
+    font-weight: 700;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-muted);
+}
+
+.loading-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+}
+
+.action-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    border: none;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.complete-btn {
+    background: #d5f5e3;
+    color: #167a45;
+}
+
+.cancel-btn {
+    background: #fadbd8;
+    color: #a93226;
+}
+
+.receipt-btn {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.action-btn:hover {
+    opacity: 0.85;
+}
+
+.toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 9999;
+    padding: 13px 18px;
+    border-radius: 10px;
+    background: #222;
+    color: white;
+    display: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.toast.success { background: #16834b; }
+.toast.error { background: #c0392b; }
+.toast.warning { background: #f39c12; }
+
+.modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none;
+    justify-content: center; align-items: center; z-index: 10000; padding: 20px;
+}
+
+.modal-content {
+    background: white; border-radius: 14px; max-width: 480px; width: 100%;
+    padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px;
+    font-size: 14px; box-sizing: border-box; outline: none;
+}
+
+.star-rating-btn {
+    background: none; border: none; font-size: 28px; cursor: pointer; color: #f39c12; padding: 2px 4px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="dashboard-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i data-lucide="tractor"></i>
+                AgriLink AI
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="dashboard-farmer.html" class="nav-item">
+                <i data-lucide="layout-dashboard"></i> Overview
+            </a>
+            <a href="farmer-market-prices.html" class="nav-item">
+                <i data-lucide="trending-up"></i> Market Prices
+            </a>
+            <a href="farmer-produce.html" class="nav-item">
+                <i data-lucide="sprout"></i> My Produce
+            </a>
+            <a href="farmer-offers.html" class="nav-item">
+                <i data-lucide="handshake"></i> Buyer Offers
+            </a>
+            <a href="farmer-transactions.html" class="nav-item active">
+                <i data-lucide="receipt"></i> Transactions
+            </a>
+            <a href="farmer-disputes.html" class="nav-item">
+                <i data-lucide="alert-triangle"></i> Disputes
+            </a>
+            <a href="farmer-logistics.html" class="nav-item">
+                <i data-lucide="truck"></i> Logistics
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#" id="logoutBtn" class="nav-item" style="color:#e74c3c;padding:0;">
+                <i data-lucide="log-out"></i> Log Out
+            </a>
+        </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+        <header class="topbar glass-panel">
+
+            <h2 class="page-title">Transactions</h2>
+
+            <div class="topbar-actions">
+
+                <button id="refreshBtn" class="btn-secondary" style="padding:8px 12px;display:flex;align-items:center;gap:8px;">
+                    <i data-lucide="refresh-cw" style="width:16px;height:16px;"></i> Refresh
+                </button>
+
+                <div class="user-profile">
+                    <div class="avatar" id="userAvatar">F</div>
+                    <span id="userName" style="font-weight:500;">Farmer</span>
+                    <div id="userTrustScore" style="margin-left:8px;"></div>
+                </div>
+
+            </div>
+
+        </header>
+
+        <div class="dashboard-container fade-in">
+
+            <!-- STATISTICS -->
+            <div class="grid-cards" style="margin-bottom:24px;">
+
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Total Transactions</span>
+                        <i data-lucide="receipt" style="width:18px;height:18px;color:var(--color-primary);"></i>
+                    </div>
+                    <div class="stat-value" id="totalTransactions">0</div>
+                </div>
+
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Pending</span>
+                        <i data-lucide="clock" style="width:18px;height:18px;color:#f39c12;"></i>
+                    </div>
+                    <div class="stat-value" id="pendingTransactions" style="color:#f39c12;">0</div>
+                </div>
+
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Completed</span>
+                        <i data-lucide="check-circle" style="width:18px;height:18px;color:var(--color-accent);"></i>
+                    </div>
+                    <div class="stat-value" id="completedTransactions" style="color:var(--color-accent);">0</div>
+                </div>
+
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Completed Earnings</span>
+                        <i data-lucide="indian-rupee" style="width:18px;height:18px;color:var(--color-primary);"></i>
+                    </div>
+                    <div class="stat-value" id="completedAmount">₹0</div>
+                </div>
+
+            </div>
+
+            <!-- TRANSACTIONS TABLE -->
+            <div class="dashboard-section glass-panel">
+
+                <div class="section-title">
+                    Transaction History & Ratings
+                </div>
+
+                <div class="transaction-toolbar">
+
+                    <div class="transaction-controls">
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            class="transaction-search"
+                            placeholder="Search buyer or crop..."
+                        >
+
+                        <select id="statusFilter" class="transaction-filter">
+                            <option value="all">All Status</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="transaction-table-wrapper">
+
+                    <table class="data-table">
+
+                        <thead>
+                            <tr>
+                                <th>Transaction</th>
+                                <th>Buyer</th>
+                                <th>Crop</th>
+                                <th>Quantity</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="transactionsTableBody">
+                            <tr>
+                                <td colspan="8" class="loading-state">
+                                    Loading transactions...
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+<!-- RAISE DISPUTE MODAL -->
+<div id="raiseDisputeModal" class="modal-backdrop">
+    <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:10px;">
+            <h3 style="margin:0;font-size:18px;">Raise Dispute: <span id="disputeTxnLabel"></span></h3>
+            <button onclick="closeDisputeModal()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#888;">&times;</button>
+        </div>
+
+        <form id="raiseDisputeForm">
+            <input type="hidden" id="disputeTxnId">
+
+            <div class="form-group">
+                <label>Issue Type *</label>
+                <select id="disputeIssueType" required>
+                    <option value="Payment Delay">Payment Delay</option>
+                    <option value="Quality Mismatch">Quality Mismatch</option>
+                    <option value="Weight Discrepancy">Weight Discrepancy</option>
+                    <option value="Late Delivery / Transit Issue">Late Delivery / Transit Issue</option>
+                    <option value="Damaged Produce">Damaged Produce</option>
+                    <option value="Other Breach of Agreement">Other Breach of Agreement</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="disputePriority">
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority (Requires Immediate Action)</option>
+                    <option value="low">Low Priority</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Description & Evidence Details *</label>
+                <textarea id="disputeDescription" rows="4" required placeholder="Describe what went wrong and what resolution you are requesting..."></textarea>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                <button type="button" onclick="closeDisputeModal()" class="action-btn" style="background:#eee;padding:8px 14px;">Cancel</button>
+                <button type="submit" class="action-btn" style="background:#dc3545;color:white;padding:8px 16px;">Submit Dispute</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- RATE & REVIEW (TRUST SCORE) MODAL -->
+<div id="rateReviewModal" class="modal-backdrop">
+    <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:10px;">
+            <h3 style="margin:0;font-size:18px;">Rate Buyer Trust Score</h3>
+            <button onclick="closeReviewModal()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#888;">&times;</button>
+        </div>
+
+        <form id="rateReviewForm">
+            <input type="hidden" id="reviewTxnId">
+
+            <p style="font-size:14px;color:var(--text-muted);margin-top:0;">
+                How was your transaction experience with <strong id="revieweeNameLabel">Buyer</strong>?
+            </p>
+
+            <div style="text-align:center;margin:18px 0;">
+                <div>
+                    <button type="button" class="star-rating-btn" onclick="setStarRating(1)">★</button>
+                    <button type="button" class="star-rating-btn" onclick="setStarRating(2)">★</button>
+                    <button type="button" class="star-rating-btn" onclick="setStarRating(3)">★</button>
+                    <button type="button" class="star-rating-btn" onclick="setStarRating(4)">★</button>
+                    <button type="button" class="star-rating-btn" onclick="setStarRating(5)">★</button>
+                </div>
+                <div id="selectedRatingText" style="font-weight:700;color:#f39c12;margin-top:6px;font-size:15px;">5 out of 5 Stars</div>
+            </div>
+
+            <div class="form-group">
+                <label>Review Feedback (Builds Public Trust Score)</label>
+                <textarea id="reviewCommentInput" rows="3" placeholder="e.g. Prompt payment, polite negotiation, seamless transport coordination..."></textarea>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                <button type="button" onclick="closeReviewModal()" class="action-btn" style="background:#eee;padding:8px 14px;">Cancel</button>
+                <button type="submit" class="action-btn" style="background:#f39c12;color:white;padding:8px 16px;">Submit Review</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/dashboard.js?v=3"></script>
+<script src="js/farmer-transactions.js"></script>
+
+</body>
+</html>

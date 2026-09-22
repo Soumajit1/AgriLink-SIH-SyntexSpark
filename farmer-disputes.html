@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disputes — Farmer — AgriLink AI</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboards.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .dispute-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .dispute-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .dispute-input, .dispute-filter {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            background: #ffffff;
+            outline: none;
+            font-size: 14px;
+        }
+        .dispute-input:focus, .dispute-filter:focus {
+            border-color: var(--color-primary);
+        }
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 14px;
+            max-width: 500px;
+            width: 100%;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .toast {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 9999;
+            padding: 13px 18px;
+            border-radius: 10px;
+            background: #222;
+            color: white;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            font-size: 14px;
+        }
+        .toast.success { background: #16834b; }
+        .toast.error { background: #c0392b; }
+        .toast.warning { background: #f39c12; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i data-lucide="tractor"></i> AgriLink AI
+            </div>
+        </div>
+        <nav class="nav-menu">
+            <a href="dashboard-farmer.html" class="nav-item">
+                <i data-lucide="layout-dashboard"></i> Overview
+            </a>
+            <a href="farmer-market-prices.html" class="nav-item">
+                <i data-lucide="trending-up"></i> Market Prices
+            </a>
+            <a href="farmer-produce.html" class="nav-item">
+                <i data-lucide="sprout"></i> My Produce
+            </a>
+            <a href="farmer-offers.html" class="nav-item">
+                <i data-lucide="handshake"></i> Buyer Offers
+            </a>
+            <a href="farmer-transactions.html" class="nav-item">
+                <i data-lucide="receipt"></i> Transactions
+            </a>
+            <a href="farmer-disputes.html" class="nav-item active">
+                <i data-lucide="alert-triangle"></i> Disputes
+            </a>
+            <a href="farmer-logistics.html" class="nav-item">
+                <i data-lucide="truck"></i> Logistics
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" id="logoutBtn" class="nav-item" style="color:#e74c3c;padding:0;">
+                <i data-lucide="log-out"></i> Log Out
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <header class="topbar glass-panel">
+            <h2 class="page-title">Dispute Resolution</h2>
+            <div class="topbar-actions">
+                <button id="refreshBtn" class="btn-secondary" style="padding:8px 14px;display:flex;align-items:center;gap:8px;">
+                    <i data-lucide="refresh-cw" style="width:16px;height:16px;"></i> Refresh
+                </button>
+                <div class="user-profile">
+                    <div class="avatar" id="userAvatar">F</div>
+                    <span id="userName" style="font-weight:500;">Farmer</span>
+                    <div id="userTrustScore" style="margin-left:8px;"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="dashboard-container fade-in">
+            <!-- STATS -->
+            <div class="grid-cards" style="margin-bottom:24px;">
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Total Disputes</span>
+                        <i data-lucide="shield-alert" style="width:18px;height:18px;color:var(--color-primary);"></i>
+                    </div>
+                    <div class="stat-value" id="totalDisputes">0</div>
+                </div>
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Open / In Investigation</span>
+                        <i data-lucide="clock" style="width:18px;height:18px;color:#f39c12;"></i>
+                    </div>
+                    <div class="stat-value" id="openDisputes" style="color:#f39c12;">0</div>
+                </div>
+                <div class="card-3d stat-card">
+                    <div class="stat-header">
+                        <span>Resolved by Admin</span>
+                        <i data-lucide="check-circle" style="width:18px;height:18px;color:var(--color-accent);"></i>
+                    </div>
+                    <div class="stat-value" id="resolvedDisputes" style="color:var(--color-accent);">0</div>
+                </div>
+            </div>
+
+            <!-- TOOLBAR -->
+            <div class="dispute-toolbar">
+                <div class="dispute-controls">
+                    <input type="text" id="searchInput" class="dispute-input" placeholder="Search ticket, issue, or buyer..." style="min-width:240px;">
+                    <select id="statusFilter" class="dispute-filter">
+                        <option value="all">All Status</option>
+                        <option value="open">Open</option>
+                        <option value="under_review">Under Review</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="dismissed">Dismissed</option>
+                    </select>
+                </div>
+                <div>
+                    <button onclick="openNewDisputeModal()" class="btn-primary" style="padding:10px 18px;display:flex;align-items:center;gap:8px;background:#c0392b;">
+                        <i data-lucide="plus-circle" style="width:16px;height:16px;"></i> Raise New Dispute
+                    </button>
+                </div>
+            </div>
+
+            <!-- TABLE -->
+            <div class="dashboard-section glass-panel" style="padding:20px;border-radius:14px;">
+                <div class="section-title" style="margin-bottom:16px;font-size:18px;font-weight:600;">Dispute Tickets & Cases</div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket</th>
+                                <th>Buyer / Counterparty</th>
+                                <th>Issue & Crop</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Date Filed</th>
+                                <th>Admin Resolution</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="disputesTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- VIEW DETAILS MODAL -->
+<div id="viewDetailsModal" class="modal-backdrop">
+    <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border-bottom:1px solid #eee;padding-bottom:10px;">
+            <h3 style="margin:0;font-size:18px;color:var(--color-primary);display:flex;align-items:center;gap:8px;">
+                <i data-lucide="info" style="width:20px;height:20px;"></i> Ticket Details: <span id="modalTicketCode"></span>
+            </h3>
+            <button onclick="closeDetailsModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#888;">&times;</button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;">
+            <div><strong>Transaction:</strong> <span id="modalTxnInfo" style="color:#555;"></span></div>
+            <div><strong>Parties:</strong> <span id="modalParties" style="color:#555;"></span></div>
+            <div><strong>Issue:</strong> <span id="modalIssueType" style="color:#e74c3c;font-weight:600;"></span></div>
+            <div><strong>Priority:</strong> <span id="modalPriority"></span> &nbsp; <strong>Status:</strong> <span id="modalStatus"></span></div>
+            
+            <div style="background:#f8f9fa;padding:12px;border-radius:8px;border:1px solid #eee;margin-top:6px;">
+                <div style="font-weight:600;margin-bottom:4px;color:#333;">Case Description:</div>
+                <div id="modalDescription" style="color:#555;line-height:1.4;white-space:pre-wrap;"></div>
+            </div>
+
+            <div style="background:#e8f8f5;padding:12px;border-radius:8px;border:1px solid #a3e4d7;margin-top:6px;">
+                <div style="font-weight:600;margin-bottom:4px;color:#1e824c;">Official Admin Resolution:</div>
+                <div id="modalResolution" style="color:#196f3d;line-height:1.4;white-space:pre-wrap;"></div>
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:18px;">
+            <button onclick="closeDetailsModal()" class="btn-secondary" style="padding:8px 16px;">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- RAISE NEW DISPUTE MODAL -->
+<div id="newDisputeModal" class="modal-backdrop">
+    <div class="modal-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #eee;padding-bottom:10px;">
+            <h3 style="margin:0;font-size:18px;color:#c0392b;display:flex;align-items:center;gap:6px;">
+                <i data-lucide="alert-triangle" style="width:20px;height:20px;"></i> Raise New Dispute Ticket
+            </h3>
+            <button onclick="closeNewDisputeModal()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#888;">&times;</button>
+        </div>
+
+        <form id="newDisputeForm">
+            <div class="form-group">
+                <label>Select Affected Transaction *</label>
+                <select id="newDisputeTxnSelect" required>
+                    <option value="">Loading transactions...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Issue Type *</label>
+                <select id="newDisputeIssueType" required>
+                    <option value="Payment Delay">Payment Delay / Non-payment</option>
+                    <option value="Quality Mismatch">Quality Dispute / Rejection Issue</option>
+                    <option value="Weight Discrepancy">Weight Discrepancy / Deduction Complaint</option>
+                    <option value="Late Delivery / Transit Issue">Late Pickup / Transit Damage</option>
+                    <option value="Other Breach of Agreement">Breach of Offer Contract</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Priority</label>
+                <select id="newDisputePriority">
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority (Urgent Resolution)</option>
+                    <option value="low">Low Priority</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Description & Evidence *</label>
+                <textarea id="newDisputeDescription" rows="4" required placeholder="Provide facts, timeline, and exact resolution requested..."></textarea>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                <button type="button" onclick="closeNewDisputeModal()" class="btn-secondary" style="padding:8px 14px;">Cancel</button>
+                <button type="submit" class="btn-primary" style="background:#c0392b;padding:8px 16px;">Submit Dispute</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="js/user-disputes.js"></script>
+<script src="js/dashboard.js?v=3"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
