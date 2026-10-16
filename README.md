@@ -1,8 +1,4 @@
-
-
-
-
-# AgriLink - Smart Agricultural Marketplace
+# AgriLink – Smart Agricultural Marketplace
 
 **A Digital Platform for Farmer–Buyer Connectivity, Price Discovery, and Agricultural Trade**
 
@@ -58,3 +54,137 @@ AgriLink addresses these challenges by providing a centralized digital marketpla
 - Support for monitoring relevant marketplace activities.
 
 ### 4. Price Discovery and Negotiation
+- Digital agricultural produce listings.
+- Offer and counter-offer workflows.
+- Support for informed pricing and mutually agreed deals.
+
+### 5. Transaction and Logistics Support
+- Transaction-related workflows.
+- Logistics coordination support.
+- Improved organization of agricultural trading activities.
+
+### 6. Trust, Grievance, and Feedback
+- Review and trust-score functionality.
+- Grievance submission facility.
+- Feedback mechanisms for users.
+
+### 7. Multilingual Support
+- Integration with Google Language API.
+- Multilingual accessibility to help users interact with the platform in supported languages.
+
+## Technology Stack
+
+| Component | Technology |
+|---|---|
+| Frontend | HTML, CSS, JavaScript |
+| Backend | Node.js, Express.js |
+| Database | MySQL |
+| Authentication | Role-based access and project-configured authentication |
+| Language Integration | Google Language API |
+| Deployment | Render |
+| Version Control | Git and GitHub |
+
+## System Architecture
+
+AgriLink follows a full-stack web application architecture consisting of the following components:
+
+1. **Frontend Layer:** Provides the interface through which farmers, buyers, and administrators access the application.
+2. **Backend Layer:** Handles application requests, business logic, authentication, and marketplace operations.
+3. **Database Layer:** Uses MySQL to store and manage application data.
+4. **External Integration Layer:** Supports multilingual functionality through Google Language API integration.
+5. **Deployment Layer:** Hosts the web application on Render for public access.
+
+## How the Platform Works
+
+1. Users access the platform through their respective roles.
+2. Farmers publish information about available agricultural produce.
+3. Buyers explore available listings and identify suitable products.
+4. Buyers and farmers negotiate prices through offers and counter-offers.
+5. Transaction-related and logistics workflows support the trading process.
+6. Users can submit grievances and feedback through the available facilities.
+
+## Local Installation and Setup
+
+### Prerequisites
+
+- Node.js and npm
+- MySQL Server
+- Git
+
+### Installation Steps
+
+**Step 1: Clone the repository**
+
+```bash
+git clone https://github.com/Soumajit1/AgriLink-SIH-SyntexSpark.git
+cd AgriLink-SIH-SyntexSpark
+```
+
+**Step 2: Install dependencies**
+
+```bash
+npm install
+```
+
+**Step 3: Configure environment variables**
+
+Create a `.env` file in the project root and configure the database connection, authentication secrets, and API keys required by the application.
+
+Use the variable names expected by the existing source code. Do not publish passwords, API keys, or other sensitive credentials in the repository.
+
+**Step 4: Configure the database**
+
+- Start MySQL Server.
+- Create the required database.
+- Import the project's database schema or execute the supplied SQL scripts.
+- Verify the database configuration in the environment variables.
+
+**Step 5: Run the application**
+
+Use the start script defined in `package.json`. For example:
+
+```bash
+npm start
+```
+
+For development, use the development script if one is configured in the project.
+
+Open the local application URL and port specified in the project configuration.
+
+## Demo Access
+
+AgriLink supports separate access for Farmers, Buyers, and Administrators.
+
+Users can register through the available registration functionality. Any dedicated demonstration credentials provided to evaluators should be verified before use and shared securely rather than publishing private production credentials in this repository.
+
+## Project Information
+
+- **Project Name:** AgriLink
+- **Event:** Smart India Hackathon 2026
+- **Problem Statement ID:** 26132
+- **Team Name:** SyntaxSpark
+- **Institution:** Asansol Engineering College
+- **Project Category:** Agriculture and Rural Development
+- **Project Type:** Full-Stack Web Application
+
+## Expected Impact
+
+AgriLink aims to improve agricultural market accessibility by connecting farmers with potential buyers, supporting informed pricing decisions, simplifying produce discovery, and encouraging transparent digital trade.
+
+The platform is designed to support stronger farmer–buyer relationships and contribute to a more accessible and efficient agricultural marketplace.
+
+## Project Links
+
+- **Live Website:** https://agrilink-sih-syntexspark.onrender.com/
+- **GitHub Repository:** https://github.com/Soumajit1/AgriLink-SIH-SyntexSpark
+
+## Team
+
+**Team SyntaxSpark**  
+Asansol Engineering College
+
+Developed as part of Smart India Hackathon 2026.
+
+---
+
+**AgriLink — Building Digital Connections for Smarter Agricultural Trade.**
