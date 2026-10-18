@@ -1,4 +1,4 @@
-# AgriLink – Smart Agricultural Marketplace
+# AgriLink - Smart Agricultural Marketplace
 
 **A Digital Platform for Farmer–Buyer Connectivity, Price Discovery, and Agricultural Trade**
 
