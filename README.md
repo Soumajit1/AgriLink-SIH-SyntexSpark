@@ -10,7 +10,7 @@ The AgriLink web application is deployed and accessible through the following li
 
 *Note: The above URL is the updated and working website link. Please refer to this link instead of the previously mentioned URL in the project presentation (PPT).*
 
-## Project Overview
+### Project Overview
 
 AgriLink is a full-stack web application developed by Team SyntaxSpark from Asansol Engineering College for Smart India Hackathon (SIH) 2026. The project aims to strengthen agricultural market connectivity by providing a digital platform that connects farmers directly with potential buyers.
 
